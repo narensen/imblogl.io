@@ -22,3 +22,8 @@ export const updateCategorySchema = z.object({
   name: z.string().min(3).optional(),
   description: z.string().optional(),
 });
+
+export const assignCategoriesSchema = z.object({
+  postId: z.number(),
+  categoryIds: z.array(z.number()), // An array of category IDs
+});
