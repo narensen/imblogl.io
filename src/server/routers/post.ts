@@ -77,6 +77,19 @@ export const postRouter = router({
       return post;
     }),
 
+  getById: publicProcedure
+    .input(z.object({ id: z.number() }))
+    .query(async ({ input }) => {
+      const post = await db.query.posts.findFirst({
+        where: eq(posts.id, input.id),
+      });
+
+      if (!post) {
+        throw new Error('Post not found');
+      }
+      return post;
+    }),
+
   create: publicProcedure
     .input(insertPostSchema)
     .mutation(async ({ input }) => {

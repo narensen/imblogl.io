@@ -29,3 +29,4 @@ export const assignCategoriesSchema = z.object({
 });
 
 export type TInsertPostSchema = z.infer<typeof insertPostSchema>;
+export type TUpdatePostSchema = z.infer<typeof updatePostSchema>;
