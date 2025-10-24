@@ -168,7 +168,7 @@ export default function EditPostPage() {
             {/* Display current image */}
             {form.watch('imageUrl') && (
               <div className="mb-4">
-                <img src={form.watch('imageUrl')} alt="Current featured image" className="max-h-40 rounded border" />
+                <img src={form.watch('imageUrl') || undefined} alt="Current featured image" className="max-h-40 rounded border" />
                 <Button
                   variant="link"
                   size="sm"
