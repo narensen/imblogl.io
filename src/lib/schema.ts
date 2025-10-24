@@ -27,3 +27,5 @@ export const assignCategoriesSchema = z.object({
   postId: z.number(),
   categoryIds: z.array(z.number()), // An array of category IDs
 });
+
+export type TInsertPostSchema = z.infer<typeof insertPostSchema>;

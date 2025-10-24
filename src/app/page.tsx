@@ -1,7 +1,6 @@
 import { serverTrpc } from '@/src/app/api/trpc/server'; // Corrected path
 import PostCard from '@/src/components/PostCard'; // Corrected path
 import { Button } from '@/components/ui/button'; // Corrected path
-import { Badge } from '@/components/ui/badge'; // Corrected path
 import CategoryBadge from '@/src/components/CategoryBadge'; // New import for CategoryBadge
 
 export default async function HomePage() {
@@ -20,7 +19,6 @@ export default async function HomePage() {
           </p>
         </div>
 
-        {/* 2. Use the new CategoryBadge component for the filters */}
         <div className="mt-10 flex flex-wrap justify-center gap-2">
           <CategoryBadge categoryName="All posts" variant="outline" />
           {categories.map((category) => (
@@ -45,24 +43,28 @@ export default async function HomePage() {
           ))}
         </div>
 
-        <nav
-          className="mt-16 flex items-center justify-between border-t border-gray-200 px-4 pt-8 sm:px-0"
-          aria-label="Pagination"
-        >
-          <div className="hidden sm:block">
-            <p className="text-sm text-gray-700">
-              Showing <span className="font-medium">1</span> to{' '}
-              <span className="font-medium">9</span> of{' '}
-              <span className="font-medium">{posts.length}</span> results
-            </p>
-          </div>
-          <div className="flex flex-1 justify-between sm:justify-end">
-            <Button variant="outline">Previous</Button>
-            <Button variant="outline" className="ml-3">
-              Next
-            </Button>
-          </div>
-        </nav>
+        {posts.length > 0 && (
+          <nav
+            className="mt-16 flex items-center justify-between border-t border-gray-200 px-4 pt-8 sm:px-0"
+            aria-label="Pagination"
+          >
+            <div className="hidden sm:block">
+              <p className="text-sm text-gray-700">
+                Showing <span className="font-medium">1</span> to{' '}
+                <span className="font-medium">{posts.length}</span> of{' '}
+                <span className="font-medium">{posts.length}</span> results
+              </p>
+            </div>
+            <div className="flex flex-1 justify-between sm:justify-end">
+              <Button variant="outline" disabled>
+                Previous
+              </Button>
+              <Button variant="outline" className="ml-3" disabled>
+                Next
+              </Button>
+            </div>
+          </nav>
+        )}
       </main>
     </div>
   );
