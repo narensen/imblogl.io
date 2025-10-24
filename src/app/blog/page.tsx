@@ -1,17 +1,15 @@
-import { serverTrpc } from '@/src/app/api/trpc/server';
+import { serverTrpc } from '@/src/app/api//trpc/server';
 import PostCard from '@/src/components/PostCard';
-import AllPostsListItem from '@/src/components/AllPostsListItem';
 import { Button } from '@/components/ui/button';
 import CategoryBadge from '@/src/components/CategoryBadge';
 import Link from 'next/link';
 
-export default async function HomePage({
+export default async function BlogPage({
   searchParams,
 }: {
   searchParams: { category?: string };
 }) {
   const categorySlug = searchParams.category;
-
   const categories = await serverTrpc.category.getAll();
 
   let posts;
@@ -21,7 +19,8 @@ export default async function HomePage({
     posts = await serverTrpc.post.getAll();
   }
 
-  const recentPosts = posts.slice(0, 3);
+  const featuredPost = posts[0];
+  const secondaryPosts = posts.slice(1, 3);
   const allOtherPosts = posts.slice(3);
 
   return (
@@ -37,14 +36,14 @@ export default async function HomePage({
         </div>
 
         <div className="mt-10 flex flex-wrap justify-center gap-2">
-          <Link href="/">
+          <Link href="/blog">
             <CategoryBadge
               categoryName="All posts"
               variant={!categorySlug ? 'default' : 'outline'}
             />
           </Link>
           {categories.map((category) => (
-            <Link key={category.id} href={`/?category=${category.slug}`}>
+            <Link key={category.id} href={`/blog?category=${category.slug}`}>
               <CategoryBadge
                 categoryName={category.name}
                 variant={
@@ -55,18 +54,34 @@ export default async function HomePage({
           ))}
         </div>
 
-        {/* --- FIX IS HERE --- */}
-        <div className="mt-16 grid grid-cols-1 gap-x-8 gap-y-16 sm:grid-cols-2 md:grid-cols-3">
-          {recentPosts.map((post) => (
-            <PostCard
-              key={post.id}
-              post={{
-                ...post,
-                createdAt: post.createdAt.toISOString(),
-                updatedAt: post.updatedAt.toISOString(),
-              }}
-            />
-          ))}
+        <div className="mt-16 grid grid-cols-1 gap-x-8 gap-y-16 border-t border-gray-200 pt-10 sm:mt-16 sm:pt-16 lg:grid-cols-2">
+          <div className="lg:col-span-1">
+            {featuredPost && (
+              <PostCard
+                key={featuredPost.id}
+                post={{
+                  ...featuredPost,
+                  postsToCategories: featuredPost.postsToCategories, // <-- FIX 1
+                  createdAt: featuredPost.createdAt.toISOString(),
+                  updatedAt: featuredPost.updatedAt.toISOString(),
+                }}
+              />
+            )}
+          </div>
+
+          <div className="lg:col-span-1 flex flex-col gap-y-12">
+            {secondaryPosts.map((post) => (
+              <PostCard
+                key={post.id}
+                post={{
+                  ...post,
+                  postsToCategories: post.postsToCategories, // <-- FIX 2
+                  createdAt: post.createdAt.toISOString(),
+                  updatedAt: post.updatedAt.toISOString(),
+                }}
+              />
+            ))}
+          </div>
         </div>
 
         {allOtherPosts.length > 0 && (
@@ -74,12 +89,13 @@ export default async function HomePage({
             <h2 className="text-3xl font-bold tracking-tight text-gray-900">
               All blog posts
             </h2>
-            <div className="mt-10 grid grid-cols-1 gap-x-8 gap-y-12 sm:grid-cols-2">
+            <div className="mt-10 grid grid-cols-1 gap-x-8 gap-y-16 sm:grid-cols-2 md:grid-cols-3">
               {allOtherPosts.map((post) => (
-                <AllPostsListItem
+                <PostCard
                   key={post.id}
                   post={{
                     ...post,
+                    postsToCategories: post.postsToCategories, // <-- FIX 3
                     createdAt: post.createdAt.toISOString(),
                     updatedAt: post.updatedAt.toISOString(),
                   }}

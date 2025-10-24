@@ -3,7 +3,9 @@ import { z } from 'zod';
 export const insertPostSchema = z.object({
   title: z.string().min(3, "Title must be at least 3 characters"),
   content: z.string().min(10, "Content must be at least 10 characters"),
+  imageUrl: z.string().url().optional(), // <-- ADD imageUrl
 });
+export type TInsertPostSchema = z.infer<typeof insertPostSchema>;
 
 export const updatePostSchema = z.object({
   id: z.number(),
@@ -11,7 +13,9 @@ export const updatePostSchema = z.object({
   content: z.string().min(10).optional(),
   publishedStatus: z.boolean().optional(),
   categoryIds: z.array(z.number()).optional(),
+  imageUrl: z.string().url().optional().nullable(), // <-- ADD imageUrl (allow null to remove)
 });
+export type TUpdatePostSchema = z.infer<typeof updatePostSchema>;
 
 export const insertCategorySchema = z.object({
   name: z.string().min(3),
@@ -29,7 +33,5 @@ export const assignCategoriesSchema = z.object({
   categoryIds: z.array(z.number()), // An array of category IDs
 });
 
-export type TInsertPostSchema = z.infer<typeof insertPostSchema>;
-export type TUpdatePostSchema = z.infer<typeof updatePostSchema>;
 export type TInsertCategorySchema = z.infer<typeof insertCategorySchema>;
 export type TUpdateCategorySchema = z.infer<typeof updateCategorySchema>;

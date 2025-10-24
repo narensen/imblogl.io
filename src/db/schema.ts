@@ -9,6 +9,7 @@ export const posts = pgTable('posts', {
   publishedStatus: boolean('published_status').default(false).notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
+  imageUrl: text('image_url'),
 });
 
 export const categories = pgTable('categories', {

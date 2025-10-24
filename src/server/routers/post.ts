@@ -129,10 +129,10 @@ export const postRouter = router({
     }),
 
   /**
-   * Creates a new post (as a draft).
+   * Creates a new post (as a draft). Now includes imageUrl.
    */
   create: publicProcedure
-    .input(insertPostSchema)
+    .input(insertPostSchema) // Includes optional imageUrl
     .mutation(async ({ input }) => {
       const slug = slugify(input.title);
 
@@ -142,6 +142,7 @@ export const postRouter = router({
           title: input.title,
           content: input.content,
           slug: slug,
+          imageUrl: input.imageUrl, // Pass imageUrl to DB
           // 'publishedStatus' defaults to false
         })
         .returning();
@@ -150,18 +151,17 @@ export const postRouter = router({
     }),
 
   /**
-   * Updates a post's text fields and published status.
+   * Updates a post's text fields, published status, and imageUrl.
    */
   update: publicProcedure
-    .input(updatePostSchema)
+    .input(updatePostSchema) // Includes optional imageUrl
     .mutation(async ({ input }) => {
-      // Destructure 'categoryIds' out, so it's not passed to .set()
       const { id, categoryIds, ...dataToUpdate } = input;
 
       const updatedPosts = await db
         .update(posts)
         .set({
-          ...dataToUpdate,
+          ...dataToUpdate, // This includes imageUrl
           updatedAt: new Date(),
         })
         .where(eq(posts.id, id))
@@ -180,6 +180,8 @@ export const postRouter = router({
         .delete(posts)
         .where(eq(posts.id, input.id))
         .returning();
+
+      // TODO: Consider deleting the associated image from Vercel Blob here
 
       return deletedPosts[0];
     }),
