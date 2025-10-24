@@ -1,11 +1,13 @@
 import { router, publicProcedure } from '../trpc';
 import { db } from '@/src/db';
-// FIX IS HERE:
-import { posts, categories, postsToCategories } from '@/src/db/schema'; 
-import { insertPostSchema, updatePostSchema } from '@/src/lib/schema';
+import { posts, categories, postsToCategories } from '@/src/db/schema';
+import {
+  insertPostSchema,
+  updatePostSchema,
+  assignCategoriesSchema,
+} from '@/src/lib/schema';
 import { z } from 'zod';
 import { eq, desc, and } from 'drizzle-orm';
-import { assignCategoriesSchema } from '@/src/lib/schema';
 
 function slugify(text: string) {
   return text
@@ -15,10 +17,15 @@ function slugify(text: string) {
 }
 
 export const postRouter = router({
-  
+  // --- PUBLIC, FILTERED PROCEDURES (for homepage) ---
+
+  /**
+   * Gets all PUBLISHED posts, sorted newest-first.
+   */
   getAll: publicProcedure.query(async () => {
     return await db.query.posts.findMany({
-      orderBy: desc(posts.createdAt),
+      where: eq(posts.publishedStatus, true), // Only get published posts
+      orderBy: desc(posts.createdAt), // Sort newest-first
       with: {
         postsToCategories: {
           with: {
@@ -29,39 +36,48 @@ export const postRouter = router({
     });
   }),
 
+  /**
+   * Gets all PUBLISHED posts for a specific category, sorted newest-first.
+   */
   getPostsByCategorySlug: publicProcedure
     .input(z.object({ slug: z.string() }))
     .query(async ({ input }) => {
-      // This is a more complex query.
-      // 1. Find the category with the matching slug
+      // 1. Find the category and include its post relationships
       const category = await db.query.categories.findFirst({
-        // This line will now work
-        where: eq(categories.slug, input.slug), 
+        where: eq(categories.slug, input.slug),
+        with: {
+          postsToCategories: {
+            with: {
+              post: true, // 2. Include the full post object
+            },
+          },
+        },
       });
 
       if (!category) {
         throw new Error('Category not found');
       }
 
-      // 2. Find all 'postsToCategories' entries for that category
-      // and include the related post for each entry.
-      const posts = await db.query.postsToCategories.findMany({
-        where: eq(postsToCategories.categoryId, category.id),
-        with: {
-          post: true, // This gets the actual post data
-        }
-      });
+      // 3. Filter the results in code
+      const publishedPosts = category.postsToCategories
+        .map((ptc) => ptc.post)
+        .filter((post) => post.publishedStatus === true) // Only get published posts
+        .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime()); // Sort newest-first
 
-      // 3. The result is { postId, categoryId, post: {...} }
-      // We just want the post data
-      return posts.map(p => p.post);
+      return publishedPosts;
     }),
 
+  /**
+   * Gets a single PUBLISHED post by its slug.
+   */
   getBySlug: publicProcedure
     .input(z.object({ slug: z.string() }))
     .query(async ({ input }) => {
       const post = await db.query.posts.findFirst({
-        where: eq(posts.slug, input.slug),
+        where: and(
+          eq(posts.slug, input.slug),
+          eq(posts.publishedStatus, true) // Only get published posts
+        ),
         with: {
           postsToCategories: {
             with: {
@@ -77,6 +93,21 @@ export const postRouter = router({
       return post;
     }),
 
+  // --- ADMIN/CRUD PROCEDURES (for admin panel) ---
+
+  /**
+   * Gets ALL posts (drafts and published) for the admin panel.
+   */
+  adminGetAll: publicProcedure.query(async () => {
+    return await db.query.posts.findMany({
+      orderBy: desc(posts.createdAt), // Sort newest-first
+    });
+  }),
+
+  /**
+   * Gets a single post by its ID (draft or published).
+   * This is for the "Edit Post" page.
+   */
   getById: publicProcedure
     .input(z.object({ id: z.number() }))
     .query(async ({ input }) => {
@@ -97,68 +128,85 @@ export const postRouter = router({
       return post;
     }),
 
+  /**
+   * Creates a new post (as a draft).
+   */
   create: publicProcedure
     .input(insertPostSchema)
     .mutation(async ({ input }) => {
       const slug = slugify(input.title);
-      
-      const newPosts = await db.insert(posts)
+
+      const newPosts = await db
+        .insert(posts)
         .values({
           title: input.title,
           content: input.content,
           slug: slug,
+          // 'publishedStatus' defaults to false
         })
         .returning();
-        
+
       return newPosts[0];
     }),
 
+  /**
+   * Updates a post's text fields and published status.
+   */
   update: publicProcedure
     .input(updatePostSchema)
     .mutation(async ({ input }) => {
-      
-      const { id, ...dataToUpdate } = input;
+      // Destructure 'categoryIds' out, so it's not passed to .set()
+      const { id, categoryIds, ...dataToUpdate } = input;
 
-      const updatedPosts = await db.update(posts)
+      const updatedPosts = await db
+        .update(posts)
         .set({
           ...dataToUpdate,
           updatedAt: new Date(),
         })
         .where(eq(posts.id, id))
         .returning();
-        
+
       return updatedPosts[0];
     }),
 
+  /**
+   * Deletes a post.
+   */
   delete: publicProcedure
     .input(z.object({ id: z.number() }))
     .mutation(async ({ input }) => {
-      
-      const deletedPosts = await db.delete(posts)
+      const deletedPosts = await db
+        .delete(posts)
         .where(eq(posts.id, input.id))
         .returning();
-        
+
       return deletedPosts[0];
     }),
 
+  /**
+   * Assigns a list of categories to a post.
+   */
   assignCategories: publicProcedure
     .input(assignCategoriesSchema)
     .mutation(async ({ input }) => {
       const { postId, categoryIds } = input;
 
-      await db.delete(postsToCategories)
+      // 1. Delete all existing relationships
+      await db
+        .delete(postsToCategories)
         .where(eq(postsToCategories.postId, postId));
 
+      // 2. Insert the new ones (if any)
       if (categoryIds.length > 0) {
-        const newRelations = categoryIds.map(catId => ({
+        const newRelations = categoryIds.map((catId) => ({
           postId: postId,
           categoryId: catId,
         }));
-        
+
         await db.insert(postsToCategories).values(newRelations);
       }
 
       return { success: true };
     }),
-
 });

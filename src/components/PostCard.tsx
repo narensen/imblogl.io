@@ -25,9 +25,6 @@ export default function PostCard({ post }: PostCardProps) {
     <article className="flex max-w-xl flex-col items-start justify-between">
       <div className="flex w-full flex-col justify-between">
         <CardHeader className="p-0">
-          <div className="flex items-center gap-x-4 text-xs text-gray-500">
-            <span>Phoenix Baker</span>
-          </div>
           <CardTitle className="mt-3 text-lg font-semibold leading-6 text-gray-900 group-hover:text-gray-600">
             <Link href={`/post/${post.slug}`}>
               <span className="absolute inset-0" />

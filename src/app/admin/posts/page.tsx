@@ -1,6 +1,6 @@
 'use client';
 
-import { trpc } from '@/src/app/api/trpc/client';
+import { trpc } from '@/src/app/api/trpc/client'; // Using your path
 import { Button } from '@/components/ui/button';
 import {
   Table,
@@ -16,7 +16,9 @@ import { useRouter } from 'next/navigation';
 export default function PostManagementPage() {
   const router = useRouter();
   
-  const { data: posts, isLoading, error, refetch } = trpc.post.getAll.useQuery();
+  // --- FIX IS HERE ---
+  // Changed from .getAll to .adminGetAll to fetch all posts
+  const { data: posts, isLoading, error, refetch } = trpc.post.adminGetAll.useQuery();
 
   const deletePost = trpc.post.delete.useMutation({
     onSuccess: () => {
@@ -55,6 +57,7 @@ export default function PostManagementPage() {
             </TableRow>
           </TableHeader>
           <TableBody>
+            {/* This list will now show all posts, including Drafts */}
             {posts?.map((post) => (
               <TableRow key={post.id}>
                 <TableCell className="font-medium">{post.title}</TableCell>

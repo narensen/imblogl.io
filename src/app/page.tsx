@@ -1,117 +1,70 @@
-import { serverTrpc } from '@/src/app/api/trpc/server';
-import PostCard from '@/src/components/PostCard';
-import AllPostsListItem from '@/src/components/AllPostsListItem';
 import { Button } from '@/components/ui/button';
-import CategoryBadge from '@/src/components/CategoryBadge';
 import Link from 'next/link';
 
-export default async function HomePage({
-  searchParams,
-}: {
-  searchParams: { category?: string };
-}) {
-  const categorySlug = searchParams.category;
-
-  const categories = await serverTrpc.category.getAll();
-
-  let posts;
-  if (categorySlug) {
-    posts = await serverTrpc.post.getPostsByCategorySlug({ slug: categorySlug });
-  } else {
-    posts = await serverTrpc.post.getAll();
-  }
-
-  const recentPosts = posts.slice(0, 3);
-  const allOtherPosts = posts.slice(3);
-
+export default function LandingPage() {
   return (
-    <div className="bg-white">
-      <main className="container mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
-        <div className="text-center">
+    <div className="flex flex-col min-h-screen">
+      {/* 1. Header (Implicit) & Hero Section */}
+      <section className="flex-grow flex items-center justify-center bg-white">
+        <div className="py-24 px-6 text-center">
           <h1 className="text-4xl font-bold tracking-tight text-gray-900 sm:text-6xl">
-            Recent blog posts
+            Welcome to the Blog
           </h1>
-          <p className="mt-4 text-lg leading-8 text-gray-600">
-            A blog about design, software, and everything in between.
+          <p className="mt-6 text-lg leading-8 text-gray-600">
+            A modern, multi-user blogging platform built with the latest tech.
+          </p>
+          <div className="mt-10 flex items-center justify-center gap-x-6">
+            <Button asChild>
+              <Link href="/blog">Read the Blog</Link>
+            </Button>
+            <Button asChild variant="outline">
+              <Link href="/admin/posts">Go to Admin</Link>
+            </Button>
+          </div>
+        </div>
+      </section>
+
+      {/* 2. Features Section */}
+      <section className="bg-gray-50 py-24">
+        <div className="container mx-auto max-w-7xl px-6 lg:px-8">
+          <div className="mx-auto max-w-2xl lg:text-center">
+            <p className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
+              Everything you need.
+            </p>
+          </div>
+          <div className="mx-auto mt-16 max-w-2xl sm:mt-20 lg:mt-24 lg:max-w-4xl">
+            <dl className="grid max-w-xl grid-cols-1 gap-x-8 gap-y-10 lg:max-w-none lg:grid-cols-2 lg:gap-y-16">
+              <div className="relative pl-16">
+                <dt className="text-base font-semibold leading-7 text-gray-900">
+                  Post Management
+                </dt>
+                <dd className="mt-2 text-base leading-7 text-gray-600">
+                  Full CRUD operations for posts, including draft and published
+                  status.
+                </dd>
+              </div>
+              <div className="relative pl-16">
+                <dt className="text-base font-semibold leading-7 text-gray-900">
+                  Category Management
+                </dt>
+                <dd className="mt-2 text-base leading-7 text-gray-600">
+                  Create, edit, and delete categories. Assign multiple
+                  categories to any post.
+                </dd>
+              </div>
+            </dl>
+          </div>
+        </div>
+      </section>
+
+      {/* 3. Footer Section */}
+      <footer className="bg-white border-t">
+        <div className="container mx-auto max-w-7xl px-6 py-12 lg:px-8">
+          <p className="text-center text-xs leading-5 text-gray-500">
+            &copy; 2025 Your Blog Platform. All rights reserved.
           </p>
         </div>
-
-        <div className="mt-10 flex flex-wrap justify-center gap-2">
-          <Link href="/">
-            <CategoryBadge
-              categoryName="All posts"
-              variant={!categorySlug ? 'default' : 'outline'}
-            />
-          </Link>
-          {categories.map((category) => (
-            <Link key={category.id} href={`/?category=${category.slug}`}>
-              <CategoryBadge
-                categoryName={category.name}
-                variant={
-                  categorySlug === category.slug ? 'default' : 'outline'
-                }
-              />
-            </Link>
-          ))}
-        </div>
-
-        {/* --- FIX IS HERE --- */}
-        <div className="mt-16 grid grid-cols-1 gap-x-8 gap-y-16 sm:grid-cols-2 md:grid-cols-3">
-          {recentPosts.map((post) => (
-            <PostCard
-              key={post.id}
-              post={{
-                ...post,
-                createdAt: post.createdAt.toISOString(),
-                updatedAt: post.updatedAt.toISOString(),
-              }}
-            />
-          ))}
-        </div>
-
-        {allOtherPosts.length > 0 && (
-          <div className="mt-16 border-t border-gray-200 pt-10 sm:mt-16 sm:pt-16">
-            <h2 className="text-3xl font-bold tracking-tight text-gray-900">
-              All blog posts
-            </h2>
-            <div className="mt-10 grid grid-cols-1 gap-x-8 gap-y-12 sm:grid-cols-2">
-              {allOtherPosts.map((post) => (
-                <AllPostsListItem
-                  key={post.id}
-                  post={{
-                    ...post,
-                    createdAt: post.createdAt.toISOString(),
-                    updatedAt: post.updatedAt.toISOString(),
-                  }}
-                />
-              ))}
-            </div>
-          </div>
-        )}
-
-        {posts.length > 0 && (
-          <nav
-            className="mt-16 flex items-center justify-between border-t border-gray-200 px-4 pt-8 sm:px-0"
-            aria-label="Pagination"
-          >
-            <div className="hidden sm:block">
-              <p className="text-sm text-gray-700">
-                Showing <span className="font-medium">1</span> to{' '}
-                <span className="font-medium">{posts.length}</span> of{' '}
-                <span className="font-medium">{posts.length}</span> results
-              </p>
-            </div>
-            <div className="flex flex-1 justify-between sm:justify-end">
-              <Button variant="outline" disabled>
-                Previous
-              </Button>
-              <Button variant="outline" className="ml-3" disabled>
-                Next
-              </Button>
-            </div>
-          </nav>
-        )}
-      </main>
+      </footer>
     </div>
   );
 }
