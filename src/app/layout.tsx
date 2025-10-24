@@ -5,7 +5,7 @@ import Header from '@/components/Header';
 
 
 export const metadata: Metadata = {
-  title: 'Blog Platform',
+  title: 'Imblogl.io',
   description: 'A multi-user blogging platform.',
 };
 
