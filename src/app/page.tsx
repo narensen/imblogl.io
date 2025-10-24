@@ -1,11 +1,28 @@
-import { serverTrpc } from '@/src/app/api/trpc/server'; // Corrected path
-import PostCard from '@/src/components/PostCard'; // Corrected path
-import { Button } from '@/components/ui/button'; // Corrected path
-import CategoryBadge from '@/src/components/CategoryBadge'; // New import for CategoryBadge
+import { serverTrpc } from '@/src/app/api/trpc/server';
+import PostCard from '@/src/components/PostCard';
+import AllPostsListItem from '@/src/components/AllPostsListItem';
+import { Button } from '@/components/ui/button';
+import CategoryBadge from '@/src/components/CategoryBadge';
+import Link from 'next/link';
 
-export default async function HomePage() {
-  const posts = await serverTrpc.post.getAll();
+export default async function HomePage({
+  searchParams,
+}: {
+  searchParams: { category?: string };
+}) {
+  const categorySlug = searchParams.category;
+
   const categories = await serverTrpc.category.getAll();
+
+  let posts;
+  if (categorySlug) {
+    posts = await serverTrpc.post.getPostsByCategorySlug({ slug: categorySlug });
+  } else {
+    posts = await serverTrpc.post.getAll();
+  }
+
+  const recentPosts = posts.slice(0, 3);
+  const allOtherPosts = posts.slice(3);
 
   return (
     <div className="bg-white">
@@ -20,18 +37,27 @@ export default async function HomePage() {
         </div>
 
         <div className="mt-10 flex flex-wrap justify-center gap-2">
-          <CategoryBadge categoryName="All posts" variant="outline" />
-          {categories.map((category) => (
+          <Link href="/">
             <CategoryBadge
-              key={category.id}
-              categoryName={category.name}
-              variant="outline"
+              categoryName="All posts"
+              variant={!categorySlug ? 'default' : 'outline'}
             />
+          </Link>
+          {categories.map((category) => (
+            <Link key={category.id} href={`/?category=${category.slug}`}>
+              <CategoryBadge
+                categoryName={category.name}
+                variant={
+                  categorySlug === category.slug ? 'default' : 'outline'
+                }
+              />
+            </Link>
           ))}
         </div>
 
-        <div className="mt-16 grid grid-cols-1 gap-x-8 gap-y-16 border-t border-gray-200 pt-10 sm:mt-16 sm:pt-16 lg:grid-cols-3">
-          {posts.map((post) => (
+        {/* --- FIX IS HERE --- */}
+        <div className="mt-16 grid grid-cols-1 gap-x-8 gap-y-16 sm:grid-cols-2 md:grid-cols-3">
+          {recentPosts.map((post) => (
             <PostCard
               key={post.id}
               post={{
@@ -42,6 +68,26 @@ export default async function HomePage() {
             />
           ))}
         </div>
+
+        {allOtherPosts.length > 0 && (
+          <div className="mt-16 border-t border-gray-200 pt-10 sm:mt-16 sm:pt-16">
+            <h2 className="text-3xl font-bold tracking-tight text-gray-900">
+              All blog posts
+            </h2>
+            <div className="mt-10 grid grid-cols-1 gap-x-8 gap-y-12 sm:grid-cols-2">
+              {allOtherPosts.map((post) => (
+                <AllPostsListItem
+                  key={post.id}
+                  post={{
+                    ...post,
+                    createdAt: post.createdAt.toISOString(),
+                    updatedAt: post.updatedAt.toISOString(),
+                  }}
+                />
+              ))}
+            </div>
+          </div>
+        )}
 
         {posts.length > 0 && (
           <nav

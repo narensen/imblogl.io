@@ -10,6 +10,7 @@ export const updatePostSchema = z.object({
   title: z.string().min(3).optional(),
   content: z.string().min(10).optional(),
   publishedStatus: z.boolean().optional(),
+  categoryIds: z.array(z.number()).optional(),
 });
 
 export const insertCategorySchema = z.object({

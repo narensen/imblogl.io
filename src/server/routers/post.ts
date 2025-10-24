@@ -4,9 +4,8 @@ import { db } from '@/src/db';
 import { posts, categories, postsToCategories } from '@/src/db/schema'; 
 import { insertPostSchema, updatePostSchema } from '@/src/lib/schema';
 import { z } from 'zod';
-import { eq } from 'drizzle-orm';
+import { eq, desc, and } from 'drizzle-orm';
 import { assignCategoriesSchema } from '@/src/lib/schema';
-import { and } from 'drizzle-orm';
 
 function slugify(text: string) {
   return text
@@ -19,13 +18,14 @@ export const postRouter = router({
   
   getAll: publicProcedure.query(async () => {
     return await db.query.posts.findMany({
+      orderBy: desc(posts.createdAt),
       with: {
         postsToCategories: {
           with: {
             category: true,
-          }
-        }
-      }
+          },
+        },
+      },
     });
   }),
 
@@ -82,6 +82,13 @@ export const postRouter = router({
     .query(async ({ input }) => {
       const post = await db.query.posts.findFirst({
         where: eq(posts.id, input.id),
+        with: {
+          postsToCategories: {
+            with: {
+              category: true,
+            },
+          },
+        },
       });
 
       if (!post) {
@@ -153,4 +160,5 @@ export const postRouter = router({
 
       return { success: true };
     }),
+
 });
