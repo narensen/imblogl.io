@@ -8,7 +8,7 @@ export default function LandingPage() {
       <section className="flex-grow flex items-center justify-center bg-white">
         <div className="py-24 px-6 text-center">
           <h1 className="text-4xl font-bold tracking-tight text-gray-900 sm:text-6xl">
-            Welcome to the Blog
+            Welcome to the Imblogl.io
           </h1>
           <p className="mt-6 text-lg leading-8 text-gray-600">
             A modern, multi-user blogging platform built with the latest tech.
@@ -56,15 +56,6 @@ export default function LandingPage() {
           </div>
         </div>
       </section>
-
-      {/* 3. Footer Section */}
-      <footer className="bg-white border-t">
-        <div className="container mx-auto max-w-7xl px-6 py-12 lg:px-8">
-          <p className="text-center text-xs leading-5 text-gray-500">
-            &copy; 2025 Your Blog Platform. All rights reserved.
-          </p>
-        </div>
-      </footer>
     </div>
   );
 }

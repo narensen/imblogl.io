@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
 import TrpcProvider from '@/src/trpc/Provider';
+import Header from '@/components/Header';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -16,9 +17,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <body className={inter.className}>
-        <TrpcProvider>{children}</TrpcProvider>
+    <html lang="en" className="h-full bg-white">
+      <body className={`${inter.className} h-full`}>
+        <TrpcProvider>
+          {/* This layout excludes the admin section */}
+          {/* We'll handle that by *not* adding it to /admin/layout.tsx */}
+          <Header /> 
+          {children}
+        </TrpcProvider>
       </body>
     </html>
   );
