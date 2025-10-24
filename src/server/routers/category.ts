@@ -20,6 +20,19 @@ export const categoryRouter = router({
     return await db.query.categories.findMany();
   }),
 
+  getById: publicProcedure
+    .input(z.object({ id: z.number() }))
+    .query(async ({ input }) => {
+      const category = await db.query.categories.findFirst({
+        where: eq(categories.id, input.id),
+      });
+
+      if (!category) {
+        throw new Error('Category not found');
+      }
+      return category;
+    }),
+
   // --- CREATE ---
   create: publicProcedure
     .input(insertCategorySchema)

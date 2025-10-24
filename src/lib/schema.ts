@@ -30,3 +30,5 @@ export const assignCategoriesSchema = z.object({
 
 export type TInsertPostSchema = z.infer<typeof insertPostSchema>;
 export type TUpdatePostSchema = z.infer<typeof updatePostSchema>;
+export type TInsertCategorySchema = z.infer<typeof insertCategorySchema>;
+export type TUpdateCategorySchema = z.infer<typeof updateCategorySchema>;
