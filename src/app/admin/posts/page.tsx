@@ -16,8 +16,6 @@ import { useRouter } from 'next/navigation';
 export default function PostManagementPage() {
   const router = useRouter();
   
-  // --- FIX IS HERE ---
-  // Changed from .getAll to .adminGetAll to fetch all posts
   const { data: posts, isLoading, error, refetch } = trpc.post.adminGetAll.useQuery();
 
   const deletePost = trpc.post.delete.useMutation({
