@@ -1,36 +1,45 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+<img width="1898" height="931" alt="Screenshot from 2025-10-25 00-45-43" src="https://github.com/user-attachments/assets/60b72933-9f0f-450d-a8f9-d18c6354b730" />
 
-## Getting Started
 
-First, run the development server:
+---
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## What it Does 📝
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+This platform allows for creating, reading, updating, and deleting blog posts. You can organize posts using categories, assigning multiple categories to a single post. The main blog page displays recently published posts, allows filtering by category, and provides individual pages for each post.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+There's also a simple admin dashboard (`/admin/posts` and `/admin/categories`) where you can manage all content, including setting posts as "Draft" or "Published" and uploading featured images.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+---
 
-## Learn More
+## Tech Stack 🛠️
 
-To learn more about Next.js, take a look at the following resources:
+* **Core:** Next.js 15 (App Router), TypeScript
+* **Backend:** tRPC, PostgreSQL (hosted on Neon), Drizzle ORM, Zod (for validation)
+* **Frontend:** React Query (via tRPC), Tailwind CSS, shadcn/ui, Sonner (for toasts)
+* **Images:** Vercel Blob
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+---
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Getting Started Locally 🚀
 
-## Deploy on Vercel
+1.  **Clone:** `git clone [INSERT YOUR GITHUB REPO LINK HERE]` and `cd` into the directory.
+2.  **Install:** `npm install`
+3.  **Database:** Set up a PostgreSQL database (e.g., on Neon).
+4.  **Environment:** Create a `.env` file in the root and add your database connection string:
+    ```env
+    DATABASE_URL="postgres://user:password@host/dbname"
+    BLOB_READ_WRITE_TOKEN="your_vercel_blob_token" # Get via 'vercel blob add'
+    ```
+5.  **Sync DB:** `npx drizzle-kit push:pg`
+6.  **Run:** `npm run dev`
+7.  Visit `http://localhost:3000`.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+---
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## A Few Notes 🤔
+
+* **Simplicity:** Chose Markdown via a basic textarea and skipped complex features like search or pagination to focus on core requirements.
+* **UI:** Leveraged `shadcn/ui` heavily for speed, aiming for a clean look similar to the provided sample.
+* **Image Uploads:** Used Vercel Blob for straightforward integration.
+
+---
