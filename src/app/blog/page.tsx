@@ -4,6 +4,8 @@ import { Button } from '@/components/ui/button';
 import CategoryBadge from '@/src/components/CategoryBadge';
 import Link from 'next/link';
 
+export const dynamic = 'force-dynamic';
+
 export default async function BlogPage({
   searchParams,
 }: {
@@ -61,7 +63,7 @@ export default async function BlogPage({
                 key={featuredPost.id}
                 post={{
                   ...featuredPost,
-                  postsToCategories: featuredPost.postsToCategories, // <-- FIX 1
+                  postsToCategories: featuredPost.postsToCategories,
                   createdAt: featuredPost.createdAt.toISOString(),
                   updatedAt: featuredPost.updatedAt.toISOString(),
                 }}
@@ -75,7 +77,7 @@ export default async function BlogPage({
                 key={post.id}
                 post={{
                   ...post,
-                  postsToCategories: post.postsToCategories, // <-- FIX 2
+                  postsToCategories: post.postsToCategories,
                   createdAt: post.createdAt.toISOString(),
                   updatedAt: post.updatedAt.toISOString(),
                 }}
@@ -95,7 +97,7 @@ export default async function BlogPage({
                   key={post.id}
                   post={{
                     ...post,
-                    postsToCategories: post.postsToCategories, // <-- FIX 3
+                    postsToCategories: post.postsToCategories,
                     createdAt: post.createdAt.toISOString(),
                     updatedAt: post.updatedAt.toISOString(),
                   }}
